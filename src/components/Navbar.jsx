@@ -15,6 +15,7 @@ let Navbar = (props) => {
       <Link className={location.pathname=="/contact" ?"active f1":"link f1" } to={"/contact"}>
         Contact Page
       </Link>
+      <Link to={"/product"}>Product Page</Link>
     </nav>
   );
 };
