@@ -1,0 +1,21 @@
+.active{
+    background-color: orange;
+    color: white;
+    border: 2px solid green;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+     margin: 5px;
+    padding: 5px;
+}
+.link{
+    margin: 5px;
+    padding: 5px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    border: 2px solid red;
+}
+.f1{
+    font-size: 40px;
+}
+
+a:hover{
+    background-color: green;
+}
