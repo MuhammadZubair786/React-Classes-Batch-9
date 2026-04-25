@@ -16,6 +16,8 @@ let Navbar = (props) => {
         Contact Page
       </Link>
       <Link to={"/product"}>Product Page</Link>
+      <Link to={"/team"} className={location.pathname =="/team"?"active f1":"link f1" }>Team</Link>
+    <Link to={"/users"} >User list</Link>
     </nav>
   );
 };
