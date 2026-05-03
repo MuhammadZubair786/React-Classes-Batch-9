@@ -1,15 +1,43 @@
 import { useState } from "react";
 import { UseEcomData } from "../Store/TodoProvider";
+import { EcomItem } from "./EomData";
 
 export const Ecom = () => {
   const [title, setTitle] = useState();
   const [price, setPrice] = useState();
-  const {addItem}=UseEcomData()
+  const { addItem,cartItem,updateItem } = UseEcomData();
+  const [editStatus, setEditStatus] = useState(false);
+  const [selectedIndex,setSelectedIndex]= useState()
 
-  const Additem = ()=>{
+  const Additem = () => {
+    console.log(title, price);
     addItem({
-        title,price
-    })
+      title,
+      price,
+    });
+    setTitle("");
+    setPrice("");
+  };
+
+  const EditItem = (i) => {
+    console.log("Test",i);
+    setTitle(cartItem[i].title)
+    setPrice(cartItem[i]["price"])
+    setEditStatus(true) 
+    setSelectedIndex(i)
+
+
+  };
+
+  const updateTodo =()=>{
+    var item = {
+      title,price
+    }
+    updateItem(item,selectedIndex)
+    setEditStatus(false)
+    setTitle("")
+    setPrice("")
+
 
   }
 
@@ -27,7 +55,14 @@ export const Ecom = () => {
         onChange={(e) => setPrice(e.target.value)}
         value={price}
       />
-      <button onClick={()=>addItem()}>Add Item</button>
+      {
+        editStatus?
+      <button onClick={updateTodo}>Update Item</button>:
+      <button onClick={Additem}>Add Item</button>
+
+
+      }
+      <EcomItem editfunc={EditItem}   />
     </>
   );
 };

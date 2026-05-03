@@ -16,16 +16,16 @@ function App() {
 
   return (
     <>
-      <h1>Hello Context Api</h1>
+      {/* <h1>Hello Context Api</h1>
       <h1>Welcome {user?.name}</h1>
       <h1>Welcome {user?.email}</h1>
 
       <UserLogin/>
       
-      <br/>
+      <br/> */}
       <CartProvider>
       <Ecom/>
-      <EcomItem/>
+     
       </CartProvider>
     </>
   );
