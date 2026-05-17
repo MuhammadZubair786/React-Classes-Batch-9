@@ -30,7 +30,24 @@ function ShowData() {
       .eq("restaurantid", input[1])
       .eq("category_id", input[0]);
     console.log(data);
+    for (var i = 0; i < data.length; i++) {
+      data[i]["qunatity"] = 0;
+    }
+    console.log(data);
     setMenu(data);
+  };
+
+  const incQuantity = (i) => {
+    console.log(menu);
+    menu[i].qunatity = menu[i].qunatity + 1;
+    setMenu([...menu]);
+  };
+  const decQuantity = (i) => {
+    if(menu[i].qunatity>0){
+           menu[i].qunatity = menu[i].qunatity - 1;
+    setMenu([...menu]);
+    }
+ 
   };
 
   useEffect(() => {
@@ -85,7 +102,9 @@ function ShowData() {
                 <td>{v.title}</td>
                 <td>{v.price}</td>
                 <td>
-                  <button>+</button>0<button>-</button>
+                  <button onClick={() => incQuantity(i)}>+</button>
+                  {v.qunatity}
+                  <button onClick={() => decQuantity(i)}>-</button>
                 </td>
               </tr>
             );
