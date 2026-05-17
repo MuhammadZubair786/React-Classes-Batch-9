@@ -17,16 +17,35 @@ const Signup = () => {
       setPasswordError("");
     }
 
-    // signInWithPassword
-    const  {data,error} = await supabase.auth.signUp({
-        email,password
-    })
-    if(error){
-        alert(error.message)
-        return
+
+    const {data:existingUser} = await supabase.from("customer")
+    .select()
+    .eq("email",email)
+
+    if(existingUser){
+      console.log(existingUser)
+      alert("User Already Exist")
+      return
+
     }
-    console.log(data)
-    alert("Signup User ")
+    else{
+       const {data,error} = await supabase.from("customer")
+    .insert({name:"Ali",email:email,password:password})
+
+    if(error){
+      console.log(error)
+      return
+    }
+    console.log("user regsister")
+
+    }
+
+    
+
+   
+
+
+
 
   };
 
