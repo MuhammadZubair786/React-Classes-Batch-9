@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { supabase } from '../config/supabase'
 
 function Login({ onLogin }) {
   const navigate = useNavigate()
@@ -7,15 +8,27 @@ function Login({ onLogin }) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     setError('')
 
-    const ok = onLogin(email, password)
-    if (!ok) {
-      setError('Wrong email or password')
+    const {data,error} = await supabase.from("users")
+    .select("")
+    .eq("email",email)
+    .eq("password",password)
+    .maybeSingle()
+
+    if(error){
+      console.log(error)
+      setError("Invalid Data")
       return
     }
+    if(data ==null){
+      setError("Invalid User dETAILS")
+      return
+    }
+    console.log(data)
+    localStorage.setItem("userData",JSON.stringify(data) )
 
     navigate('/users')
   }
@@ -28,9 +41,9 @@ function Login({ onLogin }) {
           <h1>Welcome back</h1>
           <p>Sign in to continue chatting</p>
         </div>
-
+      
         <form className="form" onSubmit={handleSubmit}>
-          {error && <p className="alert-error">{error}</p>}
+         
 
           <div className="field">
             <label htmlFor="email">Email</label>
@@ -55,6 +68,8 @@ function Login({ onLogin }) {
               required
             />
           </div>
+             {error && <p className="alert-error">{error}</p>}
+
 
           <button type="submit" className="btn btn-primary">
             Sign in

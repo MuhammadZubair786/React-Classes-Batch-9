@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { supabase } from '../config/supabase'
 
 function Signup({ onSignup }) {
   const navigate = useNavigate()
@@ -8,17 +9,21 @@ function Signup({ onSignup }) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  function handleSubmit(e) {
+ async  function handleSubmit(e) {
     e.preventDefault()
     setError('')
 
-    const ok = onSignup(name, email, password)
-    if (!ok) {
-      setError('Email already used')
-      return
-    }
+   const { data,error} = await supabase.from("users").insert([{
+    name,email,password
+   }])
 
-    navigate('/users')
+   if(error){
+    console.log(error)
+    return
+   }
+   alert("user create")
+
+    navigate('/')
   }
 
   return (
