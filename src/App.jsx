@@ -23,7 +23,7 @@ function App() {
 
             <Route path="/users" element={<Users />} />
 
-            <Route path="/chat/:userId" element={<Chat />} />
+            <Route path="/chat/:roomId" element={<Chat />} />
 
            
           </Routes>

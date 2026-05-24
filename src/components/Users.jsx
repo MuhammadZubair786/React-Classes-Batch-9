@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "../config/supabase";
 
 function Users() {
-  const otherUsers = [];
+  
   const [user, setUser] = useState([]);
   const [loginUser, setLoginUser] = useState();
+  const [senderUser, setSenderUser] = useState();
+
   let nav = useNavigate()
 
   useEffect(() => {
@@ -14,8 +16,9 @@ function Users() {
   }, []);
 
   const getAlLusers = async () => {
-    const userLogin = JSON.parse(localStorage.getItem("userData"));
+    const userLogin = JSON.parse(localStorage.getItem("userData")); //login user data get
     setLoginUser(userLogin);
+     setSenderUser(userLogin);
     const { data, error } = await supabase
       .from("users")
       .select("")
@@ -25,7 +28,10 @@ function Users() {
     setUser(data);
   };
 
+  //room create room not find : create return room id
   const createChatRoom = async (v) => {
+
+    //get room id
     const { data, error } = await supabase
       .from("chat_room")
       .select("*")
@@ -48,15 +54,21 @@ function Users() {
         .select();
 
       console.log(newRoom);
+      alert("NEW ROOM CREATE")
       nav("/chat/" + newRoom.id)
+      return
     }
     console.log(data)
+      alert("ALREADY ROOM CREATE")
+
       nav("/chat/" + data.id)
 
   };
   
 
   return (
+    <>
+      <h1 style={{textAlign:"right"}}>Welcome : {senderUser?.name}</h1>
     <div className="page">
       <div className="page-header">
         <h1>Messages</h1>
@@ -73,7 +85,7 @@ function Users() {
           {user.map(function (u) {
             return (
               <li key={u.id}>
-                {/* <Link to={"/chat/" + u.id} className="user-card"> */}
+              
                 <div className="user-card-info">
                   <strong>{u.name}</strong>
                   <span>{u.email}</span>
@@ -91,6 +103,7 @@ function Users() {
         </ul>
       )}
     </div>
+    </>
   );
 }
 

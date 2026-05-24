@@ -1,85 +1,251 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { getInitials } from '../utils'
+import { useEffect, useRef, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { getInitials } from "../utils";
+import { supabase } from "../config/supabase";
 
-function Chat({ users, user, messages, onSend }) {
-  const { userId } = useParams()
-  const [text, setText] = useState('')
-  const messagesEndRef = useRef(null)
+function Chat() {
+  const { roomId } = useParams();
+  const [text, setText] = useState("");
+  const messagesEndRef = useRef(null);
+  const [recieverUser, setRecieverUser] = useState();
+  const [senderUser, setSenderUser] = useState();
+  const [messages,setMessages] = useState([])
 
-  let chatUser = null
-  // for (let i = 0; i < users.length; i++) {
-  //   if (users[i].id === userId) {
-  //     chatUser = users[i]
-  //     break
-  //   }
-  // }
+  console.log(roomId);
 
-  const chatMessages = []
-  // if (chatUser) {
-  //   for (let i = 0; i < messages.length; i++) {
-  //     const msg = messages[i]
-  //     const betweenUs =
-  //       (msg.fromUserId === user.id && msg.toUserId === chatUser.id) ||
-  //       (msg.fromUserId === chatUser.id && msg.toUserId === user.id)
+  useEffect(() => {
+    getCurrentRoomdetails();
+    getAlLChatsMessage();
+  }, []);
 
-  //     if (betweenUs) chatMessages.push(msg)
-  //   }
-  // }
+  const getCurrentRoomdetails = async () => {
+    const userLogin = JSON.parse(localStorage.getItem("userData"));
+    setSenderUser(userLogin);
+    const { data, error } = await supabase
+      .from("chat_room")
+      .select("*")
+      .eq("id", roomId)
+      .maybeSingle();
 
-  // useEffect(function () {
-  //   messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  // }, [chatMessages.length])
+    if (data != null) {
+      if (data.sender_id == userLogin["id"]) {
+        setRecieverUser({
+          name: data.reciever_name,
+          reciever_id: data.reciever_id,
+        });
+      }
+      else{
+          setRecieverUser({
+          name: data.sender_name,
+          reciever_id: data.sender_id,
+        });
+      }
+    }
+    console.log(data);
+  };
 
-  // if (!chatUser) {
-  //   return (
-  //     <div className="not-found-card">
-  //       <h2>User not found</h2>
-  //       <p>This conversation does not exist.</p>
-  //       <Link to="/users" className="btn btn-primary" style={{ marginTop: '1rem' }}>
-  //         Back to messages
-  //       </Link>
-  //     </div>
-  //   )
-  // }
+  const chatMessages = [];
 
-  function handleSend(e) {
-    e.preventDefault()
-    if (text.trim() === '') return
+ async function handleSend(e) {
+    e.preventDefault();
+    if (text.trim() === "") return;
+    const {data,error}= await supabase.from("message")
+    .insert([{
+      sender_id:senderUser.id,
+      reciever_id:recieverUser.reciever_id,
+      message:text,
+      chat_room_id:roomId
+    }])
+    if(!error){
+      alert("add new message")
+      setMessages([...messages,{
+         sender_id:senderUser.id,
+      reciever_id:recieverUser.reciever_id,
+      message:text,
+      chat_room_id:roomId
+      }])
 
-    onSend(user.id, chatUser.id, text.trim())
-    setText('')
+    }
+  }
+
+  const getAlLChatsMessage=async()=>{
+    const {data,error} = await supabase.from("message")
+    .select("*")
+    .eq("chat_room_id",roomId)
+    console.log(data)
+    setMessages(data)
+    
+
   }
 
   return (
-    <div className="chat-page">
-     
-
-      <div className="chat-messages">
-       
-          <div className="chat-empty">
-            <span className="chat-empty-icon">👋</span>
-            <p>Say hello to nasbfnas</p>
-            <p>Start the conversation below</p>
+  <>
+    <div
+      style={{
+        height: "100vh",
+        background: "#f4f6f9",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "500px",
+          height: "90vh",
+          background: "#fff",
+          borderRadius: "20px",
+          overflow: "hidden",
+          boxShadow: "0 5px 20px rgba(0,0,0,0.1)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            background: "#0d6efd",
+            color: "#fff",
+            padding: "15px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          <div
+            style={{
+              width: "45px",
+              height: "45px",
+              borderRadius: "50%",
+              background: "#fff",
+              color: "#0d6efd",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              fontWeight: "bold",
+              fontSize: "18px",
+            }}
+          >
+            {getInitials(recieverUser?.name || "U")}
           </div>
-        
-       
 
+          <div>
+            <h3
+              style={{
+                margin: 0,
+                textTransform: "capitalize",
+                fontSize: "18px",
+              }}
+            >
+              {recieverUser?.name}
+            </h3>
 
-      <form onSubmit={handleSend} className="chat-form">
-        <input
-          type="text"
-          placeholder="Type your message..."
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-        <button type="submit" className="btn btn-primary btn-icon" title="Send">
-          ➤
-        </button>
-      </form>
+            <small>Online</small>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: "15px",
+            background: "#eef1f5",
+          }}
+        >
+          {messages.length === 0 ? (
+            <div
+              style={{
+                height: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                flexDirection: "column",
+                color: "#777",
+              }}
+            >
+              <h2>👋</h2>
+              <p>Start your conversation</p>
+            </div>
+          ) : (
+            messages.map((v, i) => {
+              const isMe = v.sender_id === senderUser?.id;
+
+              return (
+                <div
+                  key={i}
+                  style={{
+                    display: "flex",
+                    justifyContent: isMe ? "flex-end" : "flex-start",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <div
+                    style={{
+                      background: isMe ? "#0d6efd" : "#fff",
+                      color: isMe ? "#fff" : "#000",
+                      padding: "10px 14px",
+                      borderRadius: "15px",
+                      maxWidth: "70%",
+                      fontSize: "14px",
+                      boxShadow: "0 2px 5px rgba(0,0,0,0.08)",
+                    }}
+                  >
+                    {v.message}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Input */}
+        <form
+          onSubmit={handleSend}
+          style={{
+            display: "flex",
+            padding: "12px",
+            borderTop: "1px solid #ddd",
+            background: "#fff",
+          }}
+        >
+          <input
+            type="text"
+            placeholder="Type message..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            style={{
+              flex: 1,
+              border: "1px solid #ccc",
+              borderRadius: "30px",
+              padding: "12px 15px",
+              outline: "none",
+              fontSize: "14px",
+            }}
+          />
+
+          <button
+            type="submit"
+            style={{
+              marginLeft: "10px",
+              border: "none",
+              background: "#0d6efd",
+              color: "#fff",
+              width: "50px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              fontSize: "18px",
+            }}
+          >
+            ➤
+          </button>
+        </form>
+      </div>
     </div>
-    </div>
-  )
+  </>
+);
 }
 
-export default Chat
+export default Chat;
