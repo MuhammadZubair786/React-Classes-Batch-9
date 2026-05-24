@@ -14,9 +14,39 @@ function Chat() {
   console.log(roomId);
 
   useEffect(() => {
-    getCurrentRoomdetails();
-    getAlLChatsMessage();
-  }, []);
+  if (!roomId) return;
+
+  getCurrentRoomdetails();
+  getAlLChatsMessage();
+
+  const channel = supabase
+    .channel(`chat_room_${roomId}`) //roomus
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "message",
+        filter: `chat_room_id=eq.${roomId}`,
+      },
+      (newdaat) => {
+        console.log("🔥 Realtime message:", newdaat.new);
+
+        setMessages((prev) => {
+          return [...prev, newdaat.new];
+        });
+      }
+    )
+    .subscribe((status) => {
+      console.log("📡 Status:", status);
+    });
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [roomId]);
+
+
 
   const getCurrentRoomdetails = async () => {
     const userLogin = JSON.parse(localStorage.getItem("userData"));
